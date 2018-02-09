@@ -229,11 +229,15 @@ generate an alternate solution without this property?
 Do so below in a new definition of zip.
 ......................................................................*)
 
-let rec zip (x : 'a list) (y : 'b list) : ('a * 'b) list option =
+(* let rec zip (x : 'a list) (y : 'b list) : ('a * 'b) list option =
   match x, y with
   | [], [] -> Some []
   | a, [] | [], a -> None
-  | xhd :: xtl, yhd :: ytl -> Some ((xhd, yhd) :: (zip_exn xtl ytl)) ;;
+  | xhd :: xtl, yhd :: ytl -> Some ((xhd, yhd) :: (zip xtl ytl)) ;; *)
+
+let rec zip =
+  failwith "zip not implemented" ;;
+
 
 (*====================================================================
 Part 4: Factoring out None-handling
