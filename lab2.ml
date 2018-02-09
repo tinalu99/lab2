@@ -80,6 +80,10 @@ let rec prods (lst : (int * int) list) : int list =
 Now reimplement prods using map and your uncurried times function. Why
 do you need the uncurried times function?
 ......................................................................*)
+
+let prods =
+  List.map (times) ;;
+
 (*======================================================================
 Part 2: Option types
 
@@ -210,8 +214,11 @@ type of the result? Did you provide full typing information in the
 first line of the definition?
 ......................................................................*)
 
-let zip_exn =
-  fun _ -> failwith "zip_exn not implemented" ;;
+let rec zip_exn (x : 'a list) (y : 'b list) : ('a * 'b) list =
+  match x, y with
+  | [], [] -> []
+  | a, [] | [], a -> raise(Invalid_argument "lists are not the same length")
+  | xhd :: xtl, yhd :: ytl -> (xhd, yhd) :: (zip_exn xtl ytl) ;;
 
 (*......................................................................
 Exercise 11: Another problem with the implementation of zip_exn is that,
@@ -222,8 +229,11 @@ generate an alternate solution without this property?
 Do so below in a new definition of zip.
 ......................................................................*)
 
-let zip =
-  fun _ -> failwith "zip not implemented" ;;
+let rec zip (x : 'a list) (y : 'b list) : ('a * 'b) list option =
+  match x, y with
+  | [], [] -> Some []
+  | a, [] | [], a -> None
+  | xhd :: xtl, yhd :: ytl -> Some ((xhd, yhd) :: (zip_exn xtl ytl)) ;;
 
 (*====================================================================
 Part 4: Factoring out None-handling
@@ -256,7 +266,9 @@ adjusted for the result type. Implement the maybe function.
 ......................................................................*)
 
 let maybe (f : 'a -> 'b) (x : 'a option) : 'b option =
-  failwith "maybe not implemented" ;;
+  match x with
+  | None -> None
+  | Some v -> Some (f v) ;;
 
 (*......................................................................
 Exercise 13: Now reimplement dotprod to use the maybe function. (The
@@ -269,8 +281,13 @@ Lab 1.
 let sum : int list -> int =
   List.fold_left (+) 0 ;;
 
+(* let dotprod (a : int list) (b : int list) : int option =
+  match (zip a b) with
+  | None -> None
+  | Some x -> Some (sum (prods x)) ;; *)
+
 let dotprod (a : int list) (b : int list) : int option =
-  failwith "dot_prod not implemented" ;;
+  maybe sum (maybe prods (zip a b)) ;;
 
 (*......................................................................
 Exercise 14: Reimplement zip along the same lines, in zip_2 below.
