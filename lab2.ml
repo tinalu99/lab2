@@ -180,11 +180,11 @@ Exercise 8: Now rewrite min_option and max_option using the higher-order
 function calc_option. Call them min_option_2 and max_option_2.
 ......................................................................*)
 
-let min_option_2 =
-  calc_option min ;;
+let min_option_2 (x : int option) (y : int option) : int option =
+  calc_option min x y ;;
 
-let max_option_2 =
-  calc_option max ;;
+let min_option_2 (x : int option) (y : int option) : int option =
+  calc_option max x y ;;
 
 (*......................................................................
 Exercise 9: Now that we have calc_option, we can use it in other
