@@ -183,7 +183,7 @@ function calc_option. Call them min_option_2 and max_option_2.
 let min_option_2 (x : int option) (y : int option) : int option =
   calc_option min x y ;;
 
-let min_option_2 (x : int option) (y : int option) : int option =
+let max_option_2 (x : int option) (y : int option) : int option =
   calc_option max x y ;;
 
 (*......................................................................
@@ -217,8 +217,8 @@ first line of the definition?
 let rec zip_exn (x : 'a list) (y : 'b list) : ('a * 'b) list =
   match x, y with
   | [], [] -> []
-  | a, [] | [], a -> raise(Invalid_argument "lists are not the same length")
-  | xhd :: xtl, yhd :: ytl -> (xhd, yhd) :: (zip_exn xtl ytl) ;;
+  | xhd :: xtl, yhd :: ytl -> (xhd, yhd) :: (zip_exn xtl ytl)
+  | _, _ -> raise(Invalid_argument "lists are not the same length") ;;
 
 (*......................................................................
 Exercise 11: Another problem with the implementation of zip_exn is that,
@@ -229,14 +229,14 @@ generate an alternate solution without this property?
 Do so below in a new definition of zip.
 ......................................................................*)
 
-(* let rec zip (x : 'a list) (y : 'b list) : ('a * 'b) list option =
+let rec zip (x : 'a list) (y : 'b list) : ('a * 'b) list option =
   match x, y with
   | [], [] -> Some []
-  | a, [] | [], a -> None
-  | xhd :: xtl, yhd :: ytl -> Some ((xhd, yhd) :: (zip xtl ytl)) ;; *)
-
-let rec zip =
-  failwith "zip not implemented" ;;
+  | xhd :: xtl, yhd :: ytl ->
+     (match zip xtl ytl with
+      | None -> None
+      | Some ztl -> Some ((xhd, yhd) :: ztl))
+  | _, _ -> None ;;
 
 
 (*====================================================================
@@ -298,7 +298,10 @@ Exercise 14: Reimplement zip along the same lines, in zip_2 below.
 ......................................................................*)
 
 let rec zip_2 (x : int list) (y : int list) : ((int * int) list) option =
-  failwith "zip_2 not implemented" ;;
+  match x, y with
+  | [], [] -> Some []
+  | xhd :: xtl, yhd :: ytl -> maybe (fun ztl -> (xhd, yhd) :: ztl) (zip_2 xtl ytl)
+  | _, _ -> None ;;
 
 (*......................................................................
 Exercise 15: For the energetic, reimplement max_list along the same
@@ -307,7 +310,11 @@ function always passes along the None.
 ......................................................................*)
 
 let rec max_list_2 (lst : int list) : int option =
-  failwith "max_list not implemented" ;;
+  match lst with
+  | [] -> None
+  | [elt] -> Some elt
+  | head :: tail -> maybe (fun x -> max head x) (max_list_2 tail) ;;
+
 
 (*======================================================================
 Part 5: Record types
@@ -355,7 +362,7 @@ For example:
 let transcript (enrollments : enrollment list)
                (student : int)
              : enrollment list =
-  failwith "transcript not implemented" ;;
+  List.filter (fun x -> x.id = student) enrollments ;;
 
 (*......................................................................
 Exercise 17: Define a function called ids that takes an enrollment
@@ -369,7 +376,7 @@ For example:
 ......................................................................*)
 
 let ids (enrollments: enrollment list) : int list =
-  failwith "ids not implemented" ;;
+  List.sort_uniq compare (List.map (fun x -> x.id) enrollments) ;;
 
 (*......................................................................
 Exercise 18: Define a function called verify that determines whether all
@@ -380,6 +387,9 @@ For example:
 # verify college ;;
 - : bool = false
 ......................................................................*)
+let names (enrollments: enrollment list) : string list =
+  List.sort_uniq compare (List.map (fun x -> x.name) enrollments) ;;
 
 let verify (enrollments : enrollment list) : bool =
-  failwith "verify not implemented" ;;
+  List.for_all (fun l -> (List.length l) = 1)
+               (List.map (fun x -> names (transcript enrollments x)) (ids enrollments)) ;;
